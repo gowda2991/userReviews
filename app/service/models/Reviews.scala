@@ -11,8 +11,8 @@ class Reviews(tag: Tag)extends Table[ReviewRecord](tag, ReviewTable.name) {
   def movieId = column[Long]("movie_id")
   def rating = column[Long]("rating")
 
-  def userIdFK = foreignKey("fk_users_userId", userId, Users.tableQuery)(_.userId)
-  def movieIdFK = foreignKey("fk_movies_moviedId", movieId, Movies.tableQuery)(_.movieId)
+  def userIdFK = foreignKey(tableName +"fk_users_userId", userId, Users.tableQuery)(_.userId)
+  def movieIdFK = foreignKey(tableName +"fk_movies_moviedId", movieId, Movies.tableQuery)(_.movieId)
 
   override def * = (reviewId, userId, movieId, rating) <> ((ReviewRecord.apply _).tupled, ReviewRecord.unapply)
 }

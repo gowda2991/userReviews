@@ -1,66 +1,24 @@
 package service.models
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
 import service.Tables.MovieTable
-import service.common.InvalidString
 import utils.database.dbProfile._
 
-case class MovieRecord(movieId: Long, name: String, year: Long, genre: Genre)
+case class MovieRecord(movieId: Long, name: String, year: Long, userRating: Int = 0, criticRating: Int = 0, userRatingCount: Int =0, criticRatingCount: Int = 0)
 
 class Movies(tag: Tag)extends Table[MovieRecord](tag, MovieTable.name){
 
   def movieId = column[Long]("movie_id", O.PrimaryKey, O.AutoInc)
   def name = column[String]("name")
   def year = column[Long]("year")
-  def genre = column[Genre]("genre")
+  def userRating = column[Int]("user_rating")
+  def criticRating = column[Int]("critic_rating")
+  def userRatingCount = column[Int]("user_rating_count")
+  def criticRatingCount = column[Int]("critic_rating_count")
 
-  override def * = (movieId, name, year, genre) <> ((MovieRecord.apply _).tupled, MovieRecord.unapply)
+  override def * = (movieId, name, year, userRating, criticRating, userRatingCount, criticRatingCount) <> ((MovieRecord.apply _).tupled, MovieRecord.unapply)
 
 }
 
 object Movies{
   val tableQuery = TableQuery[Movies]
-}
-
-
-sealed trait Genre{
-  def asString: String
-  override def toString = asString
-}
-
-object Genre{
-  case object Comedy extends Genre{
-    override def asString: String = "COMEDY"
-  }
-
-  case object Drama extends Genre{
-    override def asString: String = "DRAMA"
-  }
-
-  case object Fiction extends Genre{
-    override def asString: String = "FICTION"
-  }
-
-  case object SciFi extends Genre{
-    override def asString: String = "SCI_FI"
-  }
-
-  case object Action extends Genre{
-    override def asString: String = "Action"
-  }
-
-  case object Romance extends Genre{
-    override def asString: String = "Romance"
-  }
-
-  def all: List[Genre] = List(Comedy, Drama, Fiction, SciFi, Action, Romance)
-
-  def fromString(str: String): Genre = all.collectFirst {
-    case level if level.asString == str => level
-  }.getOrElse(throw InvalidString(str, UserLevel.getClass))
-
-  implicit val format: Format[Genre] = Format.of[String].inmap(fromString, _.asString)
-
-  implicit val dbMapping: BaseColumnType[Genre] = MappedColumnType.base[Genre, String](_.asString, fromString)
 }

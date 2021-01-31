@@ -4,18 +4,23 @@ import com.google.inject.{AbstractModule, Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.{Json, Reads}
 import service.UserLevelsService
-import service.models.{UserLevel, UserLevelRecord}
+import service.models.{UserLevel, UserLevelRecord, UserLevels}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import utils.database._
+import slick.jdbc.H2Profile.api._
+
 
 
 @Singleton
-class UserLevelsSetup @Inject()(userLevelsService: UserLevelsService) extends AbstractModule {
+class UserLevelsSetup @Inject()() extends AbstractModule {
 
   val logger: Logger = utils.logger
 
   val userLevelsJsonPath = "app/utils/user-levels.json"
+
+  val userLevelQuery = UserLevels.tableQuery
 
   override def configure(): Unit = {
     logger.info("User Level Setup Begins")
@@ -27,10 +32,10 @@ class UserLevelsSetup @Inject()(userLevelsService: UserLevelsService) extends Ab
       _ <- Future.sequence(jsonData .map {
         level =>
           for{
-            levelOpt <- userLevelsService.getUserLevelByUserLevelName(level.levelName)
+            levelOpt <- db.run( userLevelQuery.filter(_.userLevel === level.levelName).result.headOption)
             _ <- levelOpt match {
-              case Some(l) => userLevelsService.updateUserLevelRecordWithMultiplier(l.userLevel, level.ratingMultiplier)
-              case None => userLevelsService.insertUserLevel(UserLevelRecord(-1, level.levelName, level.ratingMultiplier))
+              case Some(l) => db.run( userLevelQuery.filter(_.userLevel === l.userLevel).map(_.ratingMultiplier).update(level.ratingMultiplier).map(_ => Unit))
+              case None => db.run((userLevelQuery += UserLevelRecord(-1, level.levelName, level.ratingMultiplier)).map(_ => Unit))
             }
           }yield Unit
       })

@@ -1,10 +1,10 @@
 [
   {
     "levelName" : "USER",
-    "levelMultiplier": 1
+    "ratingMultiplier": 1
   },
   {
     "levelName" : "CRITIC",
-    "levelMultiplier" : 2
+    "ratingMultiplier" : 2
   }
 ]

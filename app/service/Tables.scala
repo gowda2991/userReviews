@@ -30,5 +30,9 @@ object Tables {
     override def tableQuery = UserLevelMappings.tableQuery
   }
 
-  def all: List[TableName] = List(UserTable, MovieTable, ReviewTable, UserLevelsTable, UserLevelMappingsTable)
+  case object MovieGenreMappingsTable extends TableName("movie_genre_mappings"){
+    override def tableQuery = MovieGenreMappings.tableQuery
+  }
+
+  def all: List[TableName] = List(UserTable, MovieTable, ReviewTable, UserLevelsTable, UserLevelMappingsTable, MovieGenreMappingsTable)
 }

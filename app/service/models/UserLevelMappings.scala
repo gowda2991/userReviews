@@ -12,9 +12,9 @@ class UserLevelMappings(tag: Tag) extends Table[UserLevelMappingRecord](tag, Use
   def levelId = column[Long]("level_id")
   def supersededBy = column[Option[Long]]("superseded_by")
 
-  def userIdFK = foreignKey("fk_users_userId", userId, Users.tableQuery)(_.userId)
-  def movieIdFK = foreignKey("fk_levels_levelId", levelId, UserLevels.tableQuery)(_.levelId)
-  def supersededByFK = foreignKey("fk_mappings_supersededBy", supersededBy, UserLevelMappings.tableQuery)
+  def userIdFK = foreignKey(tableName + "fk_users_userId", userId, Users.tableQuery)(_.userId)
+  def movieIdFK = foreignKey(tableName+ "fk_levels_levelId", levelId, UserLevels.tableQuery)(_.levelId)
+  def supersededByFK = foreignKey(tableName+ "fk_mappings_supersededBy", supersededBy, UserLevelMappings.tableQuery)(_.mappingId.?)
 
   def * = (mappingId, userId, levelId, supersededBy)<> ((UserLevelMappingRecord.apply _).tupled, UserLevelMappingRecord.unapply)
 }

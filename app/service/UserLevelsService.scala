@@ -1,32 +1,35 @@
 package service
 
-import com.google.inject.{ImplementedBy, Inject, Singleton}
+import com.google.inject.{ImplementedBy, Singleton}
 import service.models.{UserLevel, UserLevelRecord, UserLevels}
-import utils.database._
 import slick.jdbc.H2Profile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 @ImplementedBy(classOf[UserLevelServiceImpl])
 trait UserLevelsService {
-  def getUserLevelByUserLevelName(userLevel: UserLevel): Future[Option[UserLevelRecord]]
-  def updateUserLevelRecordWithMultiplier(userLevel: UserLevel, ratingMultiplier: Int): Future[Unit]
-  def insertUserLevel(userLevelRecord: UserLevelRecord): Future[Unit]
+  def getUserLevelOptByUserLevelName(userLevel: UserLevel): DBIO[Option[UserLevelRecord]]
+  def getUserLevelByUserLevelName(userLevel: UserLevel): DBIO[UserLevelRecord]
+  def updateUserLevelRecordWithMultiplier(userLevel: UserLevel, ratingMultiplier: Int): DBIO[Unit]
+  def insertUserLevel(userLevelRecord: UserLevelRecord): DBIO[Unit]
 }
 
 @Singleton
-class UserLevelServiceImpl @Inject()() extends UserLevelsService {
+class UserLevelServiceImpl extends UserLevelsService {
   val userLevelQuery = UserLevels.tableQuery
-  override def getUserLevelByUserLevelName(userLevel: UserLevel): Future[Option[UserLevelRecord]] = db.run(
+  override def getUserLevelOptByUserLevelName(userLevel: UserLevel): DBIO[Option[UserLevelRecord]] =
     userLevelQuery.filter(_.userLevel === userLevel).result.headOption
-  )
 
-  override def updateUserLevelRecordWithMultiplier(userLevel: UserLevel, ratingMultiplier: Int): Future[Unit] = db.run(
+
+  override def getUserLevelByUserLevelName(userLevel: UserLevel): DBIO[UserLevelRecord] =
+    getUserLevelOptByUserLevelName(userLevel).map(_.getOrElse(throw new Exception(s"User Level record not found for $userLevel")))
+
+
+  override def updateUserLevelRecordWithMultiplier(userLevel: UserLevel, ratingMultiplier: Int): DBIO[Unit] =
     userLevelQuery.filter(_.userLevel === userLevel).map(_.ratingMultiplier).update(ratingMultiplier).map(_ => Unit)
-  )
 
-  override def insertUserLevel(userLevelRecord: UserLevelRecord): Future[Unit] = db.run(
+
+  override def insertUserLevel(userLevelRecord: UserLevelRecord): DBIO[Unit] =
     (userLevelQuery += userLevelRecord).map(_ => Unit)
-  )
+
 }

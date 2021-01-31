@@ -7,4 +7,19 @@
 GET     /                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                                       controllers.Assets.versioned(path="/public", file: Asset)
+
+POST    /api/v1/add/user                                    controllers.UserController.addUser
+
+POST    /api/v1/add/movie                                   controllers.MovieController.addMovie
+
+POST    /api/v1/add/review                                  controllers.MovieController.addReview
+
+POST    /api/v1/top/rated/movie/by/genre                    controllers.MovieController.getTopRatedMovieByGenre
+
+POST    /api/v1/top/rated/movie/by/year                     controllers.MovieController.getTopRatedMovieByYear
+
+POST    /api/v1/top/rated/movie/by/year/criticsPreferred    controllers.MovieController.getTopRatedMovieByCriticByYear
+
+POST    /api/v1/top/rated/movie/by/year/averageRating       controllers.MovieController.getTopRatedMovieByAverageRatingByYear
+
